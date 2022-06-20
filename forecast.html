@@ -92,12 +92,12 @@
         }
 
         async function getData(cno) {
-          const positionUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${cities[cno].code}&limit=5&appid=${key}`;
+          const positionUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${cities[cno].code}&limit=5&appid=${key}`;
           const position = await $.ajax(positionUrl);
           const 위도 = position[0].lat;
           const 경도 = position[0].lon;
             
-          const airUrl = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${위도}&lon=${경도}&appid=${key}`;
+          const airUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${위도}&lon=${경도}&appid=${key}`;
           const weatherUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${위도}&lon=${경도}&exclude=hourly,minutely&appid=${key}&units=metric`;
             
           const results = await Promise.all([$.ajax(airUrl), $.ajax(weatherUrl)]);
