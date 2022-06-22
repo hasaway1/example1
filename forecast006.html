@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>버튼을 선택하면 도시를 출력</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    // 도시들을 버튼으로 출력하는 초기화 함수
+    const init=(cities)=>{
+      const $app = $('#buttons');
+      cities.forEach((city, index)=>$('<button>').text(city.name).attr('data-cno', index).appendTo($app));
+    }
+
+    // 위도와 경도를 리턴하는 함수
+    const getPosition= async (url, city, key)=>{
+      const params = {q:city, appid:key};
+      const result = await $.ajax({url:url, data:params});
+      return {위도:result[0].lat, 경도:result[0].lon};
+    }
+
+    // 날씨와 공기질을 얻어와 출력해보자
+    const getWeatherAndAir = async(weatherUrl, airUrl, position, key)=>{
+      // 공기질 url 형식
+      // `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${key}`;
+      // 날씨 url 형식
+      // `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=metric`;
+
+      // 공기질 api 파라미터 : 위도, 경도, 키
+      const params = {lat:position.위도, lon:position.경도, appid:key};
+      const airResult = await $.ajax({url:airUrl, data:params});
+
+      // 공기질 api 파라미터에 섭씨온도 파라미터 추가
+      params.units = 'metric';
+      const weatherResult = await $.ajax({url:weatherUrl, data:params});
+    
+      console.log(weatherResult);
+      console.log(airResult);
+    }
+
+    $(document).ready(async ()=>{
+      const key = "ac7bd84b82bde1e5e29c4da01645c10e";
+      const positionUrl = `https://api.openweathermap.org/geo/1.0/direct`;
+      const airUrl = `https://api.openweathermap.org/data/2.5/air_pollution`;
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/onecall`;
+
+      const cities = [
+        {name:'서울', code:'Seoul'}, {name:'부산', code:'Busan'}, {name:'인천', code:'Incheon'}, {name:'대구', code:'Daegu'}
+      ];
+      
+
+      let cno = 2;
+      let position = null;
+
+      init(cities);
+
+      position = await getPosition(positionUrl, cities[cno].code, key);
+      await getWeatherAndAir(weatherUrl, airUrl, position, key);
+
+      $('button').click(async function() {
+        cno = parseInt($(this).attr('data-cno'));
+        position = await getPosition(positionUrl, cities[cno].code, key);
+        await getWeatherAndAir(weatherUrl, airUrl, position, key);
+      })
+    })
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <div id="weather"></div>
+    <div id="buttons"></div>
+  </div>
+  <hr>
+  <ul>
+    <li>1. 도시 목록을 배열 객체로 만든다</li>
+    <li>2. 도시 목록을 document 객체에 출력</li>
+    <li>3. 출력된 도시 목록에 대한 click 이벤트 콜백 동작 확인</li>
+    <li>4. 선택한 도시를 이용해 위도, 경도를 얻어오는 메소드 추가</li>
+    <li>5. 위도와 경도를 리턴해 ready 이벤트 핸들러에 저장한다</li>
+    <li style="font-size: 1.5em; color: red;">6. 위도와 경도를 가지고 날씨와 공기 정보를 얻어오는 메소드 추가</li>
+    <li>7. 날씨와 공기 정보 중 원하는 정보를 파싱해 리턴해 ready 이벤트 핸들러에 저장한다</li>
+    <li>8. 날씨와 공기 정보를 document 객체에 출력</li>
+    <li>9. 날씨 정보를 font-awesome 아이콘으로 표시</li>
+    <li>10. 자외선 지수와 미세먼지 지수에 css 스타일 적용</li>
+  </ul>
+</body>
+
+</html>
